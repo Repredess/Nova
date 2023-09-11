@@ -1,8 +1,5 @@
 import os
 from rich.console import Console
-from rich.text import Text
-from rich.progress import track
-from time import sleep
 
 
 # /Users/pc/Desktop/Новая папка
@@ -11,17 +8,19 @@ class CheckPrefix:
 
     def __init__(self):
         self.console = Console()
+        print()
         self.clean_console()
         self.get_path()
-        self.clean_console(txt=f'Directory: {self.folder_track}')
+        self.clean_console(directory=self.folder_track)
         self.get_prefix()
-        self.clean_console(txt=f'Directory: {self.folder_track}\nPrefix: {self.prefix}')
+        self.clean_console(directory=self.folder_track, prefix=self.prefix)
         self.filter_folder()
 
     def get_path(self):
         self.folder_track = self.validate_path(txt='Enter your tracking directory:')
         while not self.folder_track:
-            self.folder_track = self.validate_path(txt='Invalid path. Put your tracking directory:', error=True)
+            self.console.print("[red]Path does not exist![red]", end=' ')
+            self.folder_track = self.validate_path(txt='Put your tracking directory:')
 
     def get_prefix(self):
         self.prefix = input('Put your prefix:\n')
@@ -37,7 +36,7 @@ class CheckPrefix:
             if item.startswith(self.prefix) and os.path.isfile(os.path.join(self.folder_track, item)):
                 if defence:
                     if item.lstrip(self.prefix).startswith('.'):
-                        print('WARNING!!! Your prefix may hide your files because they would start with "."')
+                        self.console.print('[red]WARNING!!! Your prefix may hide your files because they would start with "."[/red]')
                         answer = input("1.Continue\n2.Choose another prefix\n")
 
                         while answer not in ['1', '2']:
@@ -49,7 +48,7 @@ class CheckPrefix:
                                           os.path.join(self.folder_track, item.lstrip(self.prefix).strip()))
                                 self.changed += 1
                             except OSError:
-                                print("OSError. Check valid of your folder or prefix")
+                                print("[red]OSError. Check valid of your folder or prefix[/red]")
                             continue
                         else:
                             break
@@ -59,7 +58,7 @@ class CheckPrefix:
                               os.path.join(self.folder_track, item.lstrip(self.prefix).strip()))
                     self.changed += 1
                 except OSError:
-                    print("OSError. Check valid of your folder or prefix")
+                    self.console.print("[red]OSError. Check valid of your folder or prefix[/red]")
 
         self.report()
         _ = input("Press ENTER to continue...")
@@ -67,13 +66,15 @@ class CheckPrefix:
     def report(self):
         print(f"{self.changed}/{self.massive} files was changed successfully.")
 
-
-    def clean_console(self, txt=''):
+    def clean_console(self, directory="", prefix=""):
         self.console.clear()
-        print(txt)
+        if directory != "":
+            self.console.print(f"Directory: [green]{directory}[/green]")
+        if prefix != "":
+            self.console.print(f"Prefix: [green]{prefix}[/green]")
 
     @classmethod
-    def validate_path(cls, txt='', error=False):
+    def validate_path(cls, txt=''):
         path = input(f"{txt}\n").lstrip('\\')
 
         if os.path.exists(path):
@@ -82,10 +83,6 @@ class CheckPrefix:
             return ""
         else:
             return False
-
-    # def colored_messages(txt='', color='black'):
-    #     text = Text(txt).styled(color)
-    #     console.print(text)
 
 
 if __name__ == "__main__":
