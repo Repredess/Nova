@@ -11,6 +11,7 @@ class CheckPrefix:
 
     def __init__(self):
         self.console = Console()
+        self.clean_console()
         self.get_path()
         self.clean_console(txt=f'Directory: {self.folder_track}')
         self.get_prefix()
@@ -26,9 +27,19 @@ class CheckPrefix:
         self.prefix = input('Put your prefix:\n')
 
     def filter_folder(self):
+
+        self.changed = 0
+        self.hidden = 0
+        self.massive = len(os.listdir(path=self.folder_track))
+
         for item in os.listdir(path=self.folder_track):
-            # print(item.lstrip(self.prefix).strip())
-            if item.startswith(self.prefix):
+            # print(item)
+            # if item.startswith('.'):
+            #     self.hidden += 1
+            #     print(item)
+            #     print(self.hidden)
+
+            if item.startswith(self.prefix) and os.path.isfile(os.path.join(self.folder_track, item)):
                 # if item.lstrip(self.prefix).strip().startswith('.'):
                 #     self.colored_messages(
                 #         'WARNING!!! Your prefix may hide your files because they would starts with "."', color='red')
@@ -40,8 +51,22 @@ class CheckPrefix:
                 #         continue
                 #     if question == "2":
                 #         break
-                os.rename(os.path.join(self.folder_track, item),
-                          os.path.join(self.folder_track, item.lstrip(self.prefix).strip()))
+                try:
+                    os.rename(os.path.join(self.folder_track, item),
+                              os.path.join(self.folder_track, item.lstrip(self.prefix).strip()))
+                    self.changed += 1
+                except OSError:
+                    print("OSError. Check valid of your folder or prefix")
+
+        self.report()
+        _ = input("Press ENTER to continue...")
+
+    def report(self):
+        print(f"{self.changed}/{self.massive} files was changed successfully.", end=' ')
+        if self.hidden > 0:
+            print(f"There are {self.hidden} hidden files here.")
+        else:
+            print()
 
     def clean_console(self, txt=''):
         self.console.clear()
@@ -65,7 +90,9 @@ class CheckPrefix:
 
 if __name__ == "__main__":
     while True:
-        app = CheckPrefix()
-
+        try:
+            app = CheckPrefix()
+        except KeyboardInterrupt:
+            break
 
 # pyinstaller -F --name="SortPrefix" main.py

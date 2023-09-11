@@ -45,7 +45,7 @@ missing module named chardet - imported by pygments.lexer (delayed, conditional,
 missing module named ipywidgets - imported by rich.live (delayed, conditional, optional)
 missing module named 'IPython.display' - imported by rich.live (delayed, conditional, optional)
 missing module named IPython - imported by rich.jupyter (delayed, optional)
-missing module named typing_extensions - imported by rich.console (conditional), rich.box (conditional), rich.align (conditional), rich.control (conditional), rich.emoji (conditional), rich._ratio (conditional), rich.markdown (conditional), rich.live_render (conditional), rich.progress (conditional)
 missing module named 'IPython.core' - imported by rich.pretty (delayed, optional)
 missing module named attr - imported by rich.pretty (optional)
+missing module named typing_extensions - imported by rich.console (conditional), rich.box (conditional), rich.align (conditional), rich.control (conditional), rich.emoji (conditional), rich._ratio (conditional), rich.markdown (conditional), rich.live_render (conditional), rich.progress (conditional)
 missing module named linkify_it - imported by markdown_it.main (optional)
