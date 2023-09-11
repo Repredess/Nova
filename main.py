@@ -29,28 +29,31 @@ class CheckPrefix:
     def filter_folder(self):
 
         self.changed = 0
-        self.hidden = 0
         self.massive = len(os.listdir(path=self.folder_track))
+        defence = True
 
         for item in os.listdir(path=self.folder_track):
-            # print(item)
-            # if item.startswith('.'):
-            #     self.hidden += 1
-            #     print(item)
-            #     print(self.hidden)
 
             if item.startswith(self.prefix) and os.path.isfile(os.path.join(self.folder_track, item)):
-                # if item.lstrip(self.prefix).strip().startswith('.'):
-                #     self.colored_messages(
-                #         'WARNING!!! Your prefix may hide your files because they would starts with "."', color='red')
-                #     question = input("1.Continue\n2.Choose another prefix")
-                #     while question not in ['1', '2']:
-                #         self.colored_messages(
-                #             'Choose between 1 or 2', color='red')
-                #     if question == "1":
-                #         continue
-                #     if question == "2":
-                #         break
+                if defence:
+                    if item.lstrip(self.prefix).startswith('.'):
+                        print('WARNING!!! Your prefix may hide your files because they would start with "."')
+                        answer = input("1.Continue\n2.Choose another prefix\n")
+
+                        while answer not in ['1', '2']:
+                            answer = input('Choose between 1 or 2: ', end='')
+                        if answer == "1":
+                            defence = False
+                            try:
+                                os.rename(os.path.join(self.folder_track, item),
+                                          os.path.join(self.folder_track, item.lstrip(self.prefix).strip()))
+                                self.changed += 1
+                            except OSError:
+                                print("OSError. Check valid of your folder or prefix")
+                            continue
+                        else:
+                            break
+
                 try:
                     os.rename(os.path.join(self.folder_track, item),
                               os.path.join(self.folder_track, item.lstrip(self.prefix).strip()))
@@ -62,11 +65,8 @@ class CheckPrefix:
         _ = input("Press ENTER to continue...")
 
     def report(self):
-        print(f"{self.changed}/{self.massive} files was changed successfully.", end=' ')
-        if self.hidden > 0:
-            print(f"There are {self.hidden} hidden files here.")
-        else:
-            print()
+        print(f"{self.changed}/{self.massive} files was changed successfully.")
+
 
     def clean_console(self, txt=''):
         self.console.clear()
