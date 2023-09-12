@@ -6,15 +6,51 @@ from rich.console import Console
 
 class CheckPrefix:
 
-    def __init__(self):
+    def __init__(self, recursion):
+        self.defence = True
+        self.changed = 0
+        self.hiden = 0
         self.console = Console()
-        print()
         self.clean_console()
-        self.get_path()
-        self.clean_console(directory=self.folder_track)
-        self.get_prefix()
-        self.clean_console(directory=self.folder_track, prefix=self.prefix)
-        self.filter_folder()
+        self.recursion = recursion
+        self.start_app()
+
+    def start_app(self):
+        if self.recursion == "2":
+            self.get_path()
+            self.clean_console(directory=self.folder_track)
+            self.get_prefix()
+            self.clean_console(directory=self.folder_track, prefix=self.prefix)
+            self.filter_folder()
+        else:
+            self.get_path()
+            self.clean_console(directory=self.folder_track)
+            self.get_prefix()
+            self.clean_console(directory=self.folder_track, prefix=self.prefix)
+            self.recursive_nest(path=self.folder_track)
+            self.report()
+
+    def recursive_nest(self, path=""):
+
+        for item in os.listdir(path=path):
+
+            if os.path.isfile(os.path.join(path, item)) and item.startswith(self.prefix):
+                if item.lstrip(self.prefix).startswith('.'):
+                    self.hiden += 1
+                self.file_rename(path, item)
+
+            elif os.path.isdir(os.path.join(path, item)):
+                self.recursive_nest(path=os.path.join(path, item))
+                if item.lstrip(self.prefix).startswith('.'):
+                    self.hiden += 1
+                self.file_rename(path, item)
+
+    def file_rename(self, path, item):
+        try:
+            os.rename(os.path.join(path, item), os.path.join(path, item.lstrip(self.prefix)))
+            self.changed += 1
+        except OSError:
+            self.console.print("[red]OSError. Check valid of your folder or prefix[/red]")
 
     def get_path(self):
         self.folder_track = self.validate_path(txt='Enter your tracking directory:')
@@ -27,51 +63,48 @@ class CheckPrefix:
 
     def filter_folder(self):
 
-        self.changed = 0
-        self.massive = len(os.listdir(path=self.folder_track))
-        defence = True
-
         for item in os.listdir(path=self.folder_track):
 
             if item.startswith(self.prefix) and os.path.isfile(os.path.join(self.folder_track, item)):
-                if defence:
+
+                if self.defence:
                     if item.lstrip(self.prefix).startswith('.'):
-                        self.console.print('[red]WARNING!!! Your prefix may hide your files because they would start with "."[/red]')
+                        self.console.print(
+                            '[red]WARNING!!! Your prefix may hide your files because they would start with "."[/red]')
                         answer = input("1.Continue\n2.Choose another prefix\n")
 
                         while answer not in ['1', '2']:
                             answer = input('Choose between 1 or 2: ', end='')
                         if answer == "1":
-                            defence = False
-                            try:
-                                os.rename(os.path.join(self.folder_track, item),
-                                          os.path.join(self.folder_track, item.lstrip(self.prefix).strip()))
-                                self.changed += 1
-                            except OSError:
-                                print("[red]OSError. Check valid of your folder or prefix[/red]")
+                            self.defence = False
+                            self.file_rename(path, item)
                             continue
                         else:
                             break
 
-                try:
-                    os.rename(os.path.join(self.folder_track, item),
-                              os.path.join(self.folder_track, item.lstrip(self.prefix).strip()))
-                    self.changed += 1
-                except OSError:
-                    self.console.print("[red]OSError. Check valid of your folder or prefix[/red]")
+                self.file_rename(path, item)
 
         self.report()
-        _ = input("Press ENTER to continue...")
 
     def report(self):
-        print(f"{self.changed}/{self.massive} files was changed successfully.")
+        if recursion == "2":
+            print(f"{self.changed} files was changed successfully.")
+            if self.hiden > 0:
+                self.console.print(f"[red]{self.hiden} files was hidden because start with '.' after re-name[/red]")
+            _ = input("Press ENTER to continue...")
+        else:
+            print(f"{self.changed} files/folders was changed successfully.")
+            if self.hiden > 0:
+                self.console.print(
+                    f"[red]{self.hiden} files/folders was hidden because start with '.' after re-name[/red]")
+            _ = input("Press ENTER to continue...")
 
     def clean_console(self, directory="", prefix=""):
         self.console.clear()
         if directory != "":
             self.console.print(f"Directory: [green]{directory}[/green]")
         if prefix != "":
-            self.console.print(f"Prefix: [green]{prefix}[/green]")
+            self.console.print(f"Prefix: [green]\{prefix}[/green]")
 
     @classmethod
     def validate_path(cls, txt=''):
@@ -86,9 +119,15 @@ class CheckPrefix:
 
 
 if __name__ == "__main__":
+    clear = Console().clear()
+    recursion = input("Enable inspection of subfolders?\n1.Yes 2.No\n")
+    while recursion not in ["1", "2"]:
+        clear
+        recursion = input("Enable inspection of subfolders?\n1.Yes 2.No\n")
+
     while True:
         try:
-            app = CheckPrefix()
+            app = CheckPrefix(recursion=recursion)
         except KeyboardInterrupt:
             break
 
