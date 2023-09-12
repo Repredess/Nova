@@ -41,9 +41,12 @@ class CheckPrefix:
 
             elif os.path.isdir(os.path.join(path, item)):
                 self.recursive_nest(path=os.path.join(path, item))
-                if item.lstrip(self.prefix).startswith('.'):
-                    self.hiden += 1
-                self.file_rename(path, item)
+                if item.startswith(self.prefix):
+                    if item.lstrip(self.prefix).startswith('.'):
+                        self.hiden += 1
+                    self.file_rename(path, item)
+                else:
+                    continue
 
     def file_rename(self, path, item):
         try:
