@@ -76,8 +76,14 @@ class CheckPrefix:
                             '[red]WARNING!!! Your prefix may hide your files because they would start with "."[/red]')
                         answer = input("1.Continue\n2.Choose another prefix\n")
 
+                        try:
+                            answer = input("1.Continue\n2.Choose another prefix\n")
+                        except TypeError:
+                            answer = ""
+
                         while answer not in ['1', '2']:
                             answer = input('Choose between 1 or 2: ', end='')
+
                         if answer == "1":
                             self.defence = False
                             self.file_rename(path, item)
@@ -107,7 +113,7 @@ class CheckPrefix:
         if directory != "":
             self.console.print(f"Directory: [green]{directory}[/green]")
         if prefix != "":
-            self.console.print(f"Prefix: [green]\{prefix}[/green]")
+            self.console.print(f"Prefix: [green]{str(prefix)}[/green]")
 
     @classmethod
     def validate_path(cls, txt=''):
